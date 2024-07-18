@@ -1,0 +1,8 @@
+-r requirements.txt
+check-manifest >= 0.42
+coverage
+flake8
+mypy
+pytest
+readme_renderer
+types-requests

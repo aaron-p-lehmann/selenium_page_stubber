@@ -1,0 +1,36 @@
+[build-system]
+# These are the assumed default build requirements from pip:
+# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "selenium-page-stubber"
+description = "A program for automatically generating Selenium Page stubs for a website"
+readme = "README.md"
+keywords = ["selenium"]
+authors = [{ name="Aaron Lehmann", email="aaron.p.lehmann@gmail.com" }]
+maintainers = [{ name="Aaron Lehmann", email="aaron.p.lehmann@gmail.com" }]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console :: Framebuffer",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+]
+dynamic = ["version"]
+
+[project.scripts]
+selenium-page-stubber = "selenium_page_stubber.cli:cli"
+
+[project.urls]
+Repository = "https://github.com/aaron-p-lehmann/selenium_page_stubber"
+Issues = "https://github.com/aaron-p-lehmann/selenium_page_stubber/issues"
+
+[tool.setuptools_scm]
+write_to = "src/selenium_page_stubber/_version.py"
+fallback_version = "0.1.0"
