@@ -1,3 +1,5 @@
 click
+jinja2
 requests
 selenium
+typeclasses
