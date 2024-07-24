@@ -1,28 +1,30 @@
-from dataclasses import dataclass, InitVar, ClassVar, KW_ONLY, StrEnum
+from dataclasses import dataclass, InitVar, KW_ONLY
+from enum import StrEnum
+from typing import ClassVar, NamedTuple
 
 
 import selenium.webdriver.chrome.webdriver
-import selenium.webriver.common.by
+import selenium.webdriver.common.by
 
 
-BY: StrEnum = StrEnum("BY", [
-    selenium.webriver.common.by.By.ID,
-    selenium.webriver.common.by.By.XPATH,
-    selenium.webriver.common.by.By.LINK_TEXT,
-    selenium.webriver.common.by.By.PARTIAL_LINK_TEXT,
-    selenium.webriver.common.by.By.NAME,
-    selenium.webriver.common.by.By.TAG_NAME,
-    selenium.webriver.common.by.By.CLASS_NAME,
-    selenium.webriver.common.by.By.CSS_SELECTOR])
+class BY(StrEnum):
+    ID = selenium.webdriver.common.by.By.ID
+    XPATH = selenium.webdriver.common.by.By.XPATH
+    LINK_TEXT = selenium.webdriver.common.by.By.LINK_TEXT
+    PARTIAL_LINK_TEXT = selenium.webdriver.common.by.By.PARTIAL_LINK_TEXT
+    NAME = selenium.webdriver.common.by.By.NAME
+    TAG_NAME = selenium.webdriver.common.by.By.TAG_NAME
+    CLASS_NAME = selenium.webdriver.common.by.By.CLASS_NAME
+    CSS_SELECTOR = selenium.webdriver.common.by.By.CSS_SELECTOR
 
 
 class Locator(NamedTuple):
-    by: BY,
+    by: BY
     value: str
 
 
 @dataclass
-class PageType:
+class Page:
     locators: ClassVar[dict[str, Locator]]
 
     _: KW_ONLY
