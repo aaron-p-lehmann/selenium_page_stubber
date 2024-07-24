@@ -2,6 +2,7 @@ import importlib
 import logging
 import pathlib
 import types
+from typing import cast
 
 
 import click
@@ -10,7 +11,7 @@ import requests
 import selenium.webdriver.chrome.webdriver
 
 
-import pages
+import selenium_page_stubber.pages.Page
 
 
 def get_driver(site: str) -> selenium.webdriver.chrome.webdriver.WebDriver:
@@ -28,25 +29,26 @@ def get_driver(site: str) -> selenium.webdriver.chrome.webdriver.WebDriver:
 
 def get_page_class(
         page_directory: pathlib.Path,
-        page_class_name: str,
+        page_module: str,
+        page_class: str,
         template_directory: pathlib.Path,
-        parent: pages.Page | None = None) -> type:
+        parent: type = selenium_page_stubber.pages.Page.Page) -> type:
     """Get an existing page class or create a new one."""
-    resolved = page_module.resolve()
     try:
-        page = getattr(importlib.machinery.SourceFileLoader(
-            resolved, str(resolved / f"{page_class_name}.py")).load_module(), page_class_name)
+        module_file = "{}.py".format(page_module)
+        return cast(type, getattr(importlib.machinery.SourceFileLoader(
+            page_module,
+            str((page_directory / module_file).resolve())).load_module(),
+            page_class))
     except FileNotFoundError:
         # There's no module file, build the class from template
         try:
             env = Environment(
-                loader=FileSystemLoader(str(template_directory).resolve()))
-            page = exec(env.get_template(page_class_name).render())
+                loader=FileSystemLoader(str(template_directory.resolve())))
+            return cast(type, eval(env.get_template(page_class).render()))
         except FileNotFoundError:
-            # There's no template, either, base it on the class in this program
-            page = types.new_class(
-                page_class_name, tuple() if parent is None else (parent,))
-    return page
+            # There's no template, either, base it on the parent class
+            return types.new_class(page_class, (parent,))
 
 
 @click.command()
@@ -63,18 +65,25 @@ def get_page_class(
     default="templates",
     help="The path to the Jinja apps for building the pages.")
 @click.option(
-    "output_directory", "--output-directory", type=click.Path(exists=True),
+    "output_directory", "--output-directory",
+    type=click.Path(exists=True, path_type=pathlib.Path),
     default="./pages", help="The directory to put the Pages into")
+@click.option(
+    "page_module", "--page-module", default="Page",
+    help="The module the base page class is in")
 @click.argument("site")
-def cli(page_directory: click.Path, page_class: str,
-        template_directory: click.Path,
-        output_directory: click.Path,
+def cli(page_directory: pathlib.Path,
+        page_class: str,
+        template_directory: pathlib.Path,
+        output_directory: pathlib.Path,
+        page_module: str,
         site: str) -> None:
     """Stub out Page classes for each page in SITE."""
     driver = get_driver(site)
-    page = get_page_class(
+    page = get_page_class(  # noqa: F841
         page_directory=page_directory,
-        page_class_name=page_class,
+        page_module=page_module,
+        page_class=page_class,
         template_directory=template_directory)(driver, site)
 
 
