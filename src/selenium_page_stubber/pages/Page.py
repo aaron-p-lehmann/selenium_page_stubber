@@ -1,4 +1,4 @@
-from dataclasses import dataclass, InitVar, KW_ONLY
+from dataclasses import dataclass, KW_ONLY
 from enum import StrEnum
 from typing import ClassVar, NamedTuple
 
@@ -28,9 +28,5 @@ class Page:
     locators: ClassVar[dict[str, Locator]]
 
     _: KW_ONLY
-    driver: InitVar[selenium.webdriver.chrome.webdriver.WebDriver]
-    url: InitVar[str]
-
-    def __init__(self, *, driver, url):
-        self.driver = driver
-        self.url = url
+    driver: selenium.webdriver.chrome.webdriver.WebDriver
+    url: str
