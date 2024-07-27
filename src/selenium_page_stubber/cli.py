@@ -1,4 +1,5 @@
 import importlib
+import importlib.abc
 import logging
 import pathlib
 import types
@@ -6,7 +7,7 @@ from typing import cast
 
 
 import click
-from jinja2 import Environment, FileSystemLoader
+import jinja2
 import requests
 import selenium.webdriver.chrome.webdriver
 
@@ -34,21 +35,33 @@ def get_page_class(
         template_directory: pathlib.Path,
         parent: type = selenium_page_stubber.pages.Page.Page) -> type:
     """Get an existing page class or create a new one."""
-    try:
-        module_file = "{}.py".format(page_module)
-        return cast(type, getattr(importlib.machinery.SourceFileLoader(
-            page_module,
-            str((page_directory / module_file).resolve())).load_module(),
-            page_class))
-    except FileNotFoundError:
-        # There's no module file, build the class from template
-        try:
-            env = Environment(
-                loader=FileSystemLoader(str(template_directory.resolve())))
-            return cast(type, eval(env.get_template(page_class).render()))
-        except FileNotFoundError:
-            # There's no template, either, base it on the parent class
-            return types.new_class(page_class, (parent,))
+    module_file = "{}.py".format(page_module)
+    module_path = (page_directory / module_file).resolve()
+    template_path = template_directory.resolve()
+    new_class = parent
+    if module_path.is_file():
+        # Get the class from a module local to the project
+        spec = importlib.util.spec_from_file_location(
+            page_module, str(module_path))
+        if isinstance(spec, importlib.machinery.ModuleSpec) and isinstance(spec.loader, importlib.abc.Loader):  # noqa: E501
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            new_class = cast(type, getattr(module, page_class))
+    elif (template_path / page_class).resolve().is_file():
+        # Get the class described in the template
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(template_path))
+        module_source = env.get_template(page_class).render()
+        spec = importlib.util.spec_from_loader(page_module, loader=None)
+        if isinstance(spec, importlib.machinery.ModuleSpec):
+            module = importlib.util.module_from_spec(spec)
+            exec(module_source, module.__dict__)
+            new_class = cast(type, getattr(module, page_class))
+    else:
+        # Neither a module nor a template exists for the page class we need,
+        # create one based on parent
+        new_class = types.new_class(page_class, (parent,))
+    return new_class
 
 
 @click.command()
@@ -66,8 +79,8 @@ def get_page_class(
     help="The path to the Jinja apps for building the pages.")
 @click.option(
     "output_directory", "--output-directory",
-    type=click.Path(exists=True, path_type=pathlib.Path),
-    default="./pages", help="The directory to put the Pages into")
+    type=click.Path(path_type=pathlib.Path),
+    default="pages", help="The directory to put the Pages into")
 @click.option(
     "page_module", "--page-module", default="Page",
     help="The module the base page class is in")
@@ -80,11 +93,12 @@ def cli(page_directory: pathlib.Path,
         site: str) -> None:
     """Stub out Page classes for each page in SITE."""
     driver = get_driver(site)
-    page = get_page_class(  # noqa: F841
+    page_class = get_page_class(
         page_directory=page_directory,
         page_module=page_module,
         page_class=page_class,
-        template_directory=template_directory)(driver, site)
+        template_directory=template_directory)
+    page = page_class(driver=driver, url=site)  # noqa: F841
 
 
 if __name__ == "__main__":
