@@ -15,11 +15,6 @@ program.
 
 TODO
 ====
-Setup Stuff
------------
-- pip package file
-- write toml file
-
 Features
 --------
 - CLI
