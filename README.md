@@ -13,6 +13,13 @@ Usage
 The best CLI usage information can be found with the --help flag of the
 program.
 
+Development
+===========
+Before submitting any PRs, please make sure that your changes will pass the manifest/lex/type/test checking by running:
+```
+tox -e testing
+```
+
 TODO
 ====
 Features
