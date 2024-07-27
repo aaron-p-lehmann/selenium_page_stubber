@@ -93,12 +93,12 @@ def cli(page_directory: pathlib.Path,
         site: str) -> None:
     """Stub out Page classes for each page in SITE."""
     driver = get_driver(site)
-    page_class = get_page_class(
+    new_page_class = get_page_class(
         page_directory=page_directory,
         page_module=page_module,
         page_class=page_class,
         template_directory=template_directory)
-    page = page_class(driver=driver, url=site)  # noqa: F841
+    page = new_page_class(driver=driver, url=site)  # noqa: F841
 
 
 if __name__ == "__main__":
