@@ -30,3 +30,7 @@ class Page:
     _: KW_ONLY
     driver: InitVar[selenium.webdriver.chrome.webdriver.WebDriver]
     url: InitVar[str]
+
+    def __init__(self, *, driver, url):
+        self.driver = driver
+        self.url = url
