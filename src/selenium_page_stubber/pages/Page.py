@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import ClassVar, NamedTuple
 
 
-import selenium.webdriver.chrome.webdriver
+import selenium.webdriver.remote.webdriver
 import selenium.webdriver.common.by
 
 
@@ -28,5 +28,5 @@ class Page:
     locators: ClassVar[dict[str, Locator]]
 
     _: KW_ONLY
-    driver: selenium.webdriver.chrome.webdriver.WebDriver
+    driver: selenium.webdriver.remote.webdriver.BaseWebDriver
     url: str
