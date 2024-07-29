@@ -10,7 +10,7 @@ import jinja2
 import requests
 import selenium.webdriver.chrome.webdriver
 import selenium.webdriver.common.by
-import selenium_page_stubber.pages.Page
+import selenium_page_stubber.user.pages.Page
 
 
 def get_driver(site: str) -> selenium.webdriver.chrome.webdriver.WebDriver:
@@ -31,7 +31,7 @@ def get_page_class(
         page_module: str,
         page_class: str,
         template_directory: pathlib.Path,
-        parent: type = selenium_page_stubber.pages.Page.Page) -> type:
+        parent: type = selenium_page_stubber.user.pages.Page.Page) -> type:
     """Get an existing page class or create a new one."""
     module_file = "{}.py".format(page_module)
     module_path = (page_directory / module_file).resolve()

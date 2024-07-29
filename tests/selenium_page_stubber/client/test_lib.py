@@ -9,7 +9,8 @@ import requests
 
 
 import selenium_page_stubber.cli
-import selenium_page_stubber.pages.Page
+import selenium_page_stubber.user.pages.Page
+import selenium_page_stubber.client.lib
 
 
 @unittest.mock.patch("selenium.webdriver.chrome.webdriver.WebDriver")
@@ -65,10 +66,10 @@ def test_get_page_class_from_module(tmp_path: pathlib.Path) -> None:
     template_directory = pathlib.Path("template_directory")
 
     module_text = "\n".join([
-        "import selenium_page_stubber.pages.Page",
+        "import selenium_page_stubber.user.pages.Page",
         "",
         "",
-        f"class {page_class}(selenium_page_stubber.pages.Page.Page):",
+        f"class {page_class}(selenium_page_stubber.user.pages.Page.Page):",
         "    pass"])
     with (page_directory / "{}.py".format(page_module)).open("w") as module:
         module.write(module_text)
@@ -80,7 +81,8 @@ def test_get_page_class_from_module(tmp_path: pathlib.Path) -> None:
         template_directory=template_directory)
 
     assert new_page_class.__name__ == page_class
-    assert issubclass(new_page_class, selenium_page_stubber.pages.Page.Page)
+    assert issubclass(
+        new_page_class, selenium_page_stubber.user.pages.Page.Page)
 
 
 @pytest.mark.parametrize(
@@ -113,10 +115,10 @@ def test_get_page_class_from_template(tmp_path: pathlib.Path) -> None:
     page_class = "TestPage"
     template_directory = tmp_path
     template_text = "\n".join([
-        "import selenium_page_stubber.pages.Page",
+        "import selenium_page_stubber.user.pages.Page",
         "",
         "",
-        f"class {page_class}(selenium_page_stubber.pages.Page.Page):",
+        f"class {page_class}(selenium_page_stubber.user.pages.Page.Page):",
         "    pass"])
 
     with (template_directory / page_class).open("w") as template:
@@ -129,7 +131,8 @@ def test_get_page_class_from_template(tmp_path: pathlib.Path) -> None:
         template_directory=template_directory)
 
     assert new_page_class.__name__ == page_class
-    assert issubclass(new_page_class, selenium_page_stubber.pages.Page.Page)
+    assert issubclass(
+        new_page_class, selenium_page_stubber.user.pages.Page.Page)
 
 
 @pytest.mark.parametrize(

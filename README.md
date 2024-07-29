@@ -70,11 +70,11 @@ tox -e testing
 
 ##Directory structure
 
-This project has two directories at the main level, ```pages``` and
-```client```.  The modules in ```client``` might use modules from
-```pages```, but never vice versa.  Modules in ```pages``` might be copied
-into the user's directories, and the users might not have this program
-installed on their machines.
+This project has two directories at the main level, ```user``` and
+```client```.  The modules in ```client``` might use modules and tempates from
+```user```, but never vice versa.  Modules and templates in ```user``` might
+be copied into the user's directories, and the users might not have this
+program installed on their machines.
 
 TODO
 ====
