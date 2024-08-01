@@ -10,7 +10,7 @@ import jinja2
 import requests
 import selenium.webdriver.chrome.webdriver
 import selenium.webdriver.common.by
-import selenium_page_stubber.pages.Page
+import selenium_page_stubber.user.pages.Page
 
 
 def get_driver(site: str) -> selenium.webdriver.chrome.webdriver.WebDriver:
@@ -31,7 +31,8 @@ def get_page_class(
         page_module: str,
         page_class: str,
         template_directory: pathlib.Path,
-        parent: type = selenium_page_stubber.pages.Page.Page) -> type:
+        template_name: str,
+        parent: type = selenium_page_stubber.user.pages.Page.Page) -> type:
     """Get an existing page class or create a new one."""
     module_file = "{}.py".format(page_module)
     module_path = (page_directory / module_file).resolve()
@@ -60,3 +61,38 @@ def get_page_class(
         # create one based on parent
         new_class = types.new_class(page_class, (parent,))
     return new_class
+
+
+def copy_with_possible_suffix(
+        data: str, target: pathlib.Path, suffix: str = ".new") -> None:
+    """Copy src to target, or to <targetname>.new, if target already exists.
+    Don't copy anything if the file already exists and has the same data."""
+    suffix = f".{suffix.lstrip('.')}"
+    if target.suffix == suffix:
+        raise ValueError(
+            f"'{target}' has the same suffix as the one provided: '{suffix}'")
+    try:
+        existing_data = target.read_text()
+        if existing_data != data:
+            target = target.with_suffix(suffix)
+            target.write_text(data)
+    except FileNotFoundError:
+        target.write_text(data)
+
+
+def initialize(
+        pages_src: pathlib.Path,
+        pages_target: pathlib.Path,
+        templates_src: pathlib.Path,
+        templates_target: pathlib.Path) -> None:
+    """Create page_directory and template_directory, if necessary, then copy
+    everything over from the "user" directories."""
+    pages_target.mkdir(exist_ok=True)
+    templates_target.mkdir(exist_ok=True)
+
+    for f in pages_src.iterdir():
+        if f.is_file():
+            copy_with_possible_suffix(f.read_text(), pages_target / f.name)
+    for f in templates_src.iterdir():
+        if f.is_file():
+            copy_with_possible_suffix(f.read_text(), templates_target / f.name)
