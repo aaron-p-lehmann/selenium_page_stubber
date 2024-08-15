@@ -238,30 +238,39 @@ def test_initialize(
         wraps=templates_target.mkdir)
     templates_target_spy = templates_target.mkdir
 
-    pages_src.mkdir()
-    templates_src.mkdir()
-    for f in ["a.py", "b.py", "c.py"]:
-        (pages_src / f).touch()
-        (pages_src / f).write_text(f)
-    for f in ["d.jinja", "e.jinja", "f.jinja"]:
-        (templates_src / f).touch()
-        (templates_src / f).write_text(f)
+    try:
+        pages_src.mkdir()
+        templates_src.mkdir()
+        for f in ["a.py", "b.py", "c.py"]:
+            (pages_src / f).touch()
+            (pages_src / f).write_text(f)
+        for f in ["d.jinja", "e.jinja", "f.jinja"]:
+            (templates_src / f).touch()
+            (templates_src / f).write_text(f)
 
-    selenium_page_stubber.client.lib.initialize(
-        pages_src=pages_src,
-        templates_src=templates_src,
-        pages_target=pages_target,
-        templates_target=templates_target)
+        selenium_page_stubber.client.lib.initialize(
+            pages_src=pages_src,
+            templates_src=templates_src,
+            pages_target=pages_target,
+            templates_target=templates_target)
+    finally:
+        for (dirpath, dirnames, filenames) in tmp_path.walk(top_down=False):
+            for entry in filenames + dirnames:
+                entry_path = (dirpath / entry)
+                entry_path.chmod(777)
+                if entry_path.is_file():
+                    entry_path.unlink()
+                else:
+                    entry_path.rmdir()
 
-    pages_target_spy.assert_called_once_with(exist_ok=True)
-    templates_target_spy.assert_called_once_with(exist_ok=True)
-    mock_copy_with_possible_suffix([
-        unittest.mock.call(
-            (src / filename).read_text(),
-            (target / filename))
-        for (src, target, filenames) in (
-            (pages_src, pages_target, [
-                "a.py", "b.py", "c.py"]),
-            (templates_src, templates_target, [
-                "d.jinja", "e.jinja", "f.jinja"]))
-        for filename in filenames])
+    pages_target_spy.assert_called_once()
+    templates_target_spy.assert_called_once()
+    calls = [(filename, (target / filename))
+             for (src, target, filenames) in (
+                 (pages_src, pages_target, [
+                     "a.py", "b.py", "c.py"]),
+                 (templates_src, templates_target, [
+                     "d.jinja", "e.jinja", "f.jinja"]))
+             for filename in filenames]
+    for (text, target) in calls:
+        mock_copy_with_possible_suffix.assert_any_call(text, target)
