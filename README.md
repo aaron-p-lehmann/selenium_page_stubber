@@ -23,7 +23,7 @@ page modules.  Their names are supplied at the command line, and default to
 ```pages``` and ```templates```, respectively.  There will be one module that
 holds the base class for all page classes a tamplate for building a page class,
 which can be componentized, if necessary.  There will be one page class called
-HomePage.  This is the class that represents the initial site.  Any page can
+Page.  This is the class that is the parent to every Page stuff.  Any page can
 be modified manually after creation.
 
 Here is an example directory structure:
@@ -31,31 +31,25 @@ Here is an example directory structure:
 *Main selenium project*
 |
 |
+|
+|
+|
 |-------> pages/
+|       |
+|       |
+|       |-------> Page.py
+|       |
+|       |
+|       |-------> <any number of other Page modules, one for each page>
+|
+|
+|-------> templates/
         |
         |
-        |-------> pages/
-        |       |
-        |       |
-        |       |-------> BasePage.py
-        |       |
-        |       |
-        |       |-------> HomePage.py
-        |       |
-        |       |
-        |       |-------> lib.py <utility functions used by the pages>
-        |       |
-        |       |
-        |       |-------> <any number of other Page modules, one for each page>
+        |-------> Page.jinja <template used to build pages>
         |
         |
-        |-------> templates/
-                |
-                |
-                |-------> Page.jinja <template used to build pages>
-                |
-                |
-                |-------> <any number of other templates, which can be used by Page.jinja
+        |-------> <any number of other templates, which can be used by Page.jinja
         
 #Development
 
