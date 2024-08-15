@@ -78,6 +78,7 @@ def copy_with_possible_suffix(
             target.write_text(data)
     except FileNotFoundError:
         target.write_text(data)
+    target.chmod(0o666)
 
 
 def initialize(
@@ -87,8 +88,8 @@ def initialize(
         templates_target: pathlib.Path) -> None:
     """Create page_directory and template_directory, if necessary, then copy
     everything over from the "user" directories."""
-    pages_target.mkdir(exist_ok=True)
-    templates_target.mkdir(exist_ok=True)
+    pages_target.mkdir(exist_ok=True, mode=0o777)
+    templates_target.mkdir(exist_ok=True, mode=0o777)
 
     for f in pages_src.iterdir():
         if f.is_file():
